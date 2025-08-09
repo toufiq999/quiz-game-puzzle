@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Knowledge Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --bg-gradient-light: linear-gradient(135deg, #6b48ff, #00ddeb);
+            --bg-gradient-dark: linear-gradient(135deg, #2c3e50, #4b79a1);
+            --container-bg-light: rgba(255, 255, 255, 0.9);
+            --container-bg-dark: rgba(44, 62, 80, 0.85);
+            --text-color-light: #333;
+            --text-color-dark: #ecf0f1;
+            --button-bg-light: #6b48ff;
+            --button-bg-hover-light: #5c3de6;
+            --button-bg-dark: #00ddeb;
+            --button-bg-hover-dark: #00b7c3;
+            --correct-color: #2ecc71;
+            --incorrect-color: #e74c3c;
+            --progress-bar-bg: #ccc;
+            --progress-bar-fill: #6b48ff;
+            --shadow-light: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-dark: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --progress-bar-fill: #00ddeb;
+        }
+
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-image: var(--bg-gradient-light);
+            color: var(--text-color-light);
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 80px; /* Space for sticky header */
+        }
+
+        [data-theme="dark"] body {
+            background-image: var(--bg-gradient-dark);
+            color: var(--text-color-dark);
+        }
+
+        /* Header and Navigation */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--container-bg-light);
+            box-shadow: var(--shadow-light);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: background-color 0.3s;
+        }
+
+        [data-theme="dark"] .header {
+            background: var(--container-bg-dark);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .header .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header .nav a {
+            color: inherit;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .header .nav a:hover {
+            color: #6b48ff;
+        }
+
+        [data-theme="dark"] .header .nav a:hover {
+            color: #00ddeb;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 2px solid;
+            border-radius: 20px;
+            padding: 0.3rem 0.6rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        [data-theme="light"] .theme-toggle {
+            color: #6b48ff;
+            border-color: #6b48ff;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            color: #00ddeb;
+            border-color: #00ddeb;
+        }
+        
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        /* Quiz Container */
+        .quiz-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--container-bg-light);
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            padding: 2rem;
+            margin: 0 auto 2rem auto;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        
+        [data-theme="dark"] .quiz-container {
+            background: var(--container-bg-dark);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        
+        /* Level Indicators and Progress Bar */
+        .levels-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .level-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        .level-indicator.active {
+            background-color: var(--progress-bar-fill);
+            color: white;
+            border-color: var(--progress-bar-fill);
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: var(--progress-bar-bg);
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--progress-bar-fill);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        #timer {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        #question-text {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .option {
+            background: rgba(128, 128, 128, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .option.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+        }
+
+        .option.incorrect {
+            background-color: var(--incorrect-color);
+            color: white;
+            border-color: var(--incorrect-color);
+        }
+        
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        [data-theme="light"] .btn {
+            background-image: linear-gradient(to right, #6b48ff, #5c3de6);
+        }
+
+        [data-theme="dark"] .btn {
+            background-image: linear-gradient(to right, #00ddeb, #00b7c3);
+        }
+        
+        #next-btn { display: none; }
+
+        /* Hint Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--container-bg-light);
+            margin: auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            animation: fadeIn 0.3s;
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background-color: var(--container-bg-dark);
+            box-shadow: var(--shadow-dark);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        #hint-text {
+            font-size: 1.2rem;
+        }
+
+        /* Result Section */
+        #result-section {
+            text-align: center;
+        }
+        
+        #result-section h2 {
+            margin-bottom: 1rem;
+        }
+
+        #incorrect-answers-list {
+            list-style: none;
+            text-align: left;
+            max-width: 500px;
+            margin: 2rem auto;
+            background: rgba(0,0,0,0.05);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        #incorrect-answers-list li {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        /* Policy Sections */
+        .policy-section {
+            background: var(--container-bg-light);
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        [data-theme="dark"] .policy-section {
+            background: var(--container-bg-dark);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .policy-section h2 {
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 1rem 2%;
+            }
+            .header .nav {
+                margin-top: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body { padding-top: 120px; }
+            main { padding: 1rem; }
+            .quiz-container { padding: 1.5rem; }
+            .options-grid { grid-template-columns: 1fr; }
+            #question-text { font-size: 1.1rem; }
+            .btn { font-size: 0.9rem; padding: 0.7rem 1.2rem; }
+            .header .nav a { margin-left: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="title">General Knowledge Quiz</div>
+        <nav class="nav">
+            <a href="#quiz">Home</a>
+            <a href="#privacy">Privacy Policy</a>
+            <a href="#terms">Terms</a>
+            <a href="#refund">Refund</a>
+        </nav>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light and dark mode">Light Mode</button>
+    </header>
+
+    <main>
+        <section id="quiz" class="quiz-container">
+            <div id="start-screen">
+                <h2>Welcome to the General Knowledge Quiz!</h2>
+                <p>Select a difficulty to begin. You have 15 seconds per question.</p>
+                <button id="start-btn" class="btn" style="margin-top: 1rem;">Start Quiz</button>
+            </div>
+            
+            <div id="quiz-screen" style="display: none;">
+                <div class="info-bar">
+                    <span id="level-info">Level: 1</span>
+                    <span id="question-counter">Question: 1/10</span>
+                    <span id="score">Score: 0</span>
+                </div>
+
+                <div class="levels-container">
+                    <div class="level-indicator" data-level="1">1</div>
+                    <div class="level-indicator" data-level="2">2</div>
+                    <div class="level-indicator" data-level="3">3</div>
+                    <div class="level-indicator" data-level="4">4</div>
+                    <div class="level-indicator" data-level="5">5</div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+
+                <div style="text-align: right; margin-bottom: 1rem;" id="timer">15</div>
+
+                <div id="question-text">Question text goes here...</div>
+                <div id="options-grid" class="options-grid">
+                    <!-- Options will be generated by JS -->
+                </div>
+
+                <div class="controls">
+                    <button id="hint-btn" class="btn" aria-label="Get a hint">Get Hint</button>
+                    <button id="next-btn" class="btn" aria-label="Go to the next question">Next</button>
+                </div>
+            </div>
+
+            <div id="result-section" style="display: none;">
+                <h2>Quiz Complete!</h2>
+                <p>Final Score: <span id="final-score"></span></p>
+                <p>High Score: <span id="high-score"></span></p>
+                <h3>Incorrect Answers:</h3>
+                <ul id="incorrect-answers-list"></ul>
+                <button id="restart-btn" class="btn">Restart Quiz</button>
+            </div>
+        </section>
+
+        <section id="privacy" class="policy-section">
+            <h2>Privacy Policy</h2>
+            <p>We are committed to protecting your privacy. This quiz game does not collect any personal data. All scores, including your high score, are saved directly in your browser's `localStorage` and are not transmitted to any server. If you need support, you can contact us at support@quizwebsite.com.</p>
+        </section>
+
+        <section id="terms" class="policy-section">
+            <h2>Terms of Service</h2>
+            <p>This General Knowledge Quiz is provided for personal, non-commercial use only. You are not permitted to modify, distribute, or reverse-engineer the code. The quiz content is aggregated from various third-party sources and is provided "as is" without any warranties of accuracy. We are not responsible for any third-party content.</p>
+        </section>
+
+        <section id="refund" class="policy-section">
+            <h2>Refund Policy</h2>
+            <p>The General Knowledge Quiz is completely free to play. As there are no purchases, there are no refunds. In the future, should we introduce premium features, any purchases will be eligible for a full refund within 30 days of the transaction date, no questions asked.</p>
+        </section>
+    </main>
+    
+    <div id="hint-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="hint-title">Hint</h3>
+            <p id="hint-text"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-section');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const levelInfo = document.getElementById('level-info');
+        const questionCounterEl = document.getElementById('question-counter');
+        const scoreEl = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const timerEl = document.getElementById('timer');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsGrid = document.getElementById('options-grid');
+        const hintBtn = document.getElementById('hint-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const levelIndicators = document.querySelectorAll('.level-indicator');
+        const hintModal = document.getElementById('hint-modal');
+        const hintTextEl = document.getElementById('hint-text');
+        const finalScoreEl = document.getElementById('final-score');
+        const highScoreEl = document.getElementById('high-score');
+        const incorrectAnswersList = document.getElementById('incorrect-answers-list');
+
+        // --- QUIZ QUESTIONS ---
+        const quizData = {
+            easy: [
+                { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: "Mars", hint: "It's the fourth planet from the Sun." },
+                { question: "What is the capital of France?", options: ["London", "Berlin", "Madrid", "Paris"], answer: "Paris", hint: "Famous for the Eiffel Tower." },
+                { question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: "Pacific", hint: "It covers about one-third of the surface of the Earth." },
+                { question: "Who wrote 'Romeo and Juliet'?", options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"], answer: "William Shakespeare", hint: "An English playwright and poet, widely regarded as the greatest writer in the English language." },
+                { question: "What is 7 * 8?", options: ["54", "56", "64", "63"], answer: "56", hint: "It's eight less than 64." },
+                { question: "Which is the smallest continent?", options: ["Asia", "Australia", "Antarctica", "Europe"], answer: "Australia", hint: "Also a country." },
+                { question: "What gas do plants absorb from the atmosphere?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], answer: "Carbon Dioxide", hint: "It's what we exhale." },
+                { question: "What is the currency of the USA?", options: ["Euro", "Pound", "Dollar", "Yen"], answer: "Dollar", hint: "Its symbol is $." },
+                { question: "How many colors are in a rainbow?", options: ["5", "6", "7", "8"], answer: "7", hint: "ROYGBIV is the acronym." },
+                { question: "Which animal is known as the 'King of the Jungle'?", options: ["Tiger", "Elephant", "Lion", "Giraffe"], answer: "Lion", hint: "It has a large mane." },
+            ],
+            moderate: [
+                { question: "What is the currency of Japan?", options: ["Won", "Yuan", "Yen", "Rupee"], answer: "Yen", hint: "Symbolized by ¥." },
+                { question: "Who painted the Mona Lisa?", options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"], answer: "Leonardo da Vinci", hint: "An Italian polymath of the High Renaissance." },
+                { question: "In which country are the pyramids of Giza located?", options: ["Sudan", "Mexico", "Egypt", "Peru"], answer: "Egypt", hint: "It's in North Africa." },
+                { question: "What is the chemical symbol for gold?", options: ["Ag", "Au", "Pb", "Fe"], answer: "Au", hint: "From the Latin word 'aurum'." },
+                { question: "Which is the longest river in the world?", options: ["Amazon", "Nile", "Yangtze", "Mississippi"], answer: "Nile", hint: "It flows into the Mediterranean Sea." },
+                { question: "What is the hardest natural substance on Earth?", options: ["Gold", "Iron", "Diamond", "Platinum"], answer: "Diamond", hint: "A form of carbon." },
+                { question: "Who invented the telephone?", options: ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "Guglielmo Marconi"], answer: "Alexander Graham Bell", hint: "He was a Scottish-born scientist." },
+                { question: "What is the capital of Australia?", options: ["Sydney", "Melbourne", "Canberra", "Perth"], answer: "Canberra", hint: "It's not the largest city." },
+                { question: "How many bones are in the adult human body?", options: ["206", "210", "201", "215"], answer: "206", hint: "Babies are born with more." },
+                { question: "Which element has the atomic number 1?", options: ["Helium", "Oxygen", "Hydrogen", "Lithium"], answer: "Hydrogen", hint: "It is the lightest element." },
+            ],
+            intermediate: [
+                { question: "What is the main ingredient in guacamole?", options: ["Tomato", "Avocado", "Onion", "Lime"], answer: "Avocado", hint: "It's a green fruit." },
+                { question: "Who was the first person to walk on the moon?", options: ["Buzz Aldrin", "Yuri Gagarin", "Neil Armstrong", "Michael Collins"], answer: "Neil Armstrong", hint: "An American astronaut." },
+                { question: "Which country is the largest by land area?", options: ["Canada", "China", "USA", "Russia"], answer: "Russia", hint: "It spans Eastern Europe and Northern Asia." },
+                { question: "What does 'CPU' stand for?", options: ["Central Processing Unit", "Computer Personal Unit", "Central Processor Unit", "Control Processing Unit"], answer: "Central Processing Unit", hint: "The brain of the computer." },
+                { question: "Which famous physicist developed the theory of relativity?", options: ["Isaac Newton", "Galileo Galilei", "Albert Einstein", "Stephen Hawking"], answer: "Albert Einstein", hint: "Known for E=mc²." },
+                { question: "In what year did the Titanic sink?", options: ["1905", "1912", "1918", "1923"], answer: "1912", hint: "It was on its maiden voyage." },
+                { question: "What is the largest desert in the world?", options: ["Sahara Desert", "Arabian Desert", "Gobi Desert", "Antarctic Polar Desert"], answer: "Antarctic Polar Desert", hint: "Deserts are not always hot." },
+                { question: "Which artist cut off his own ear?", options: ["Pablo Picasso", "Salvador Dalí", "Vincent van Gogh", "Claude Monet"], answer: "Vincent van Gogh", hint: "A Dutch Post-Impressionist painter." },
+                { question: "The Great Wall of China was primarily built to protect against invasions from which group?", options: ["The Mongols", "The Japanese", "The Russians", "The Koreans"], answer: "The Mongols", hint: "Nomadic tribes from the North." },
+                { question: "What is the square root of 144?", options: ["10", "11", "12", "13"], answer: "12", hint: "It's a dozen." },
+            ],
+            hard: [
+                { question: "Who discovered the neutron?", options: ["J.J. Thomson", "Ernest Rutherford", "James Chadwick", "Niels Bohr"], answer: "James Chadwick", hint: "An English physicist who was awarded the Nobel Prize in Physics in 1935." },
+                { question: "What is the capital city of Bhutan?", options: ["Kathmandu", "Dhaka", "Thimphu", "Ulaanbaatar"], answer: "Thimphu", hint: "It is the only capital city in the world without traffic lights." },
+                { question: "In which year did the Chernobyl disaster occur?", options: ["1984", "1986", "1989", "1991"], answer: "1986", hint: "A nuclear accident in the Soviet Union." },
+                { question: "What is the most spoken language in the world by number of native speakers?", options: ["English", "Mandarin Chinese", "Spanish", "Hindi"], answer: "Mandarin Chinese", hint: "The official language of China and Taiwan." },
+                { question: "The Kama Sutra originated in which country?", options: ["India", "Nepal", "Thailand", "China"], answer: "India", hint: "An ancient text on human sexual behavior." },
+                { question: "What is the value of 'e' (Euler's number) to two decimal places?", options: ["3.14", "1.61", "2.72", "1.41"], answer: "2.72", hint: "The base of natural logarithms." },
+                { question: "Who wrote 'The Art of War'?", options: ["Lao Tzu", "Confucius", "Sun Tzu", "Zhuge Liang"], answer: "Sun Tzu", hint: "An ancient Chinese military strategist." },
+                { question: "Which is the only U.S. state to have a one-syllable name?", options: ["Ohio", "Texas", "Maine", "Iowa"], answer: "Maine", hint: "Located in the New England region." },
+                { question: "What is the boiling point of water in Kelvin?", options: ["273.15 K", "373.15 K", "100 K", "212 K"], answer: "373.15 K", hint: "Add 273.15 to the Celsius value." },
+                { question: "The Battle of Waterloo was fought in which modern-day country?", options: ["France", "Germany", "Belgium", "Netherlands"], answer: "Belgium", hint: "It marked the final defeat of Napoleon Bonaparte." },
+            ],
+            veryHard: [
+                { question: "What is the name of the smallest bone in the human body?", options: ["Incus", "Malleus", "Stapes", "Patella"], answer: "Stapes", hint: "Located in the middle ear." },
+                { question: "Who was the last emperor of Russia?", options: ["Alexander III", "Nicholas II", "Peter the Great", "Ivan the Terrible"], answer: "Nicholas II", hint: "He was executed by the Bolsheviks." },
+                { question: "What is the term for a word that is spelled the same forwards and backwards?", options: ["Palindrome", "Anagram", "Onomatopoeia", "Antonym"], answer: "Palindrome", hint: "Examples include 'racecar' and 'level'." },
+                { question: "Which element is named after the creator of the periodic table?", options: ["Einsteinium", "Curium", "Mendelevium", "Nobelium"], answer: "Mendelevium", hint: "Dmitri Mendeleev." },
+                { question: "In what year was the World Wide Web invented by Tim Berners-Lee?", options: ["1985", "1989", "1993", "1995"], answer: "1989", hint: "It was created at CERN in Switzerland." },
+                { question: "What is the study of flags called?", options: ["Cartography", "Philately", "Vexillology", "Numismatics"], answer: "Vexillology", hint: "From the Latin word 'vexillum'." },
+                { question: "The 'Cullinan Diamond', one of the largest gem-quality diamonds ever found, is part of which country's Crown Jewels?", options: ["France", "United Kingdom", "Russia", "Spain"], answer: "United Kingdom", hint: "Discovered in South Africa in 1905." },
+                { question: "What is the value of the mathematical constant 'phi' (the golden ratio) to three decimal places?", options: ["1.414", "1.732", "1.618", "2.236"], answer: "1.618", hint: "Often found in art, architecture, and nature." },
+                { question: "What is the only country in the world whose flag is not rectangular?", options: ["Switzerland", "Vatican City", "Nepal", "Qatar"], answer: "Nepal", hint: "It's made of two pennons." },
+                { question: "Which novel begins with the line 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.'?", options: ["Wuthering Heights", "Jane Eyre", "Pride and Prejudice", "Sense and Sensibility"], answer: "Pride and Prejudice", hint: "Written by Jane Austen." },
+            ],
+        };
+        const difficultyLevels = ['easy', 'moderate', 'intermediate', 'hard', 'veryHard'];
+
+        // --- QUIZ STATE ---
+        let currentLevel = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 15;
+        let currentLevelQuestions = [];
+        let incorrectAnswers = [];
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Toggles the color theme between light and dark mode.
+         * Updates the theme attribute on the HTML element and saves the preference in localStorage.
+         */
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+            try {
+                localStorage.setItem('quizTheme', newTheme);
+            } catch (e) {
+                console.error("LocalStorage is not available.", e);
+            }
+        }
+
+        /**
+         * Initializes and starts a new quiz level.
+         * It shuffles the questions for the current level and loads the first question.
+         */
+        function startLevel() {
+            if (currentLevel >= difficultyLevels.length) {
+                showResults();
+                return;
+            }
+
+            const difficulty = difficultyLevels[currentLevel];
+            // Validate question data
+            const questionsForLevel = quizData[difficulty];
+            if (!questionsForLevel || questionsForLevel.length === 0) {
+                console.error(`No questions found for level: ${difficulty}`);
+                alert("Error: Missing questions for the next level. Cannot continue.");
+                return;
+            }
+            
+            // Shuffle questions and take the first 10
+            currentLevelQuestions = [...questionsForLevel].sort(() => Math.random() - 0.5).slice(0, 10);
+            
+            currentQuestionIndex = 0;
+            updateLevelIndicator();
+            loadQuestion();
+        }
+
+        /**
+         * Loads and displays the current question and options.
+         * Resets UI elements for the new question and starts the timer.
+         */
+        function loadQuestion() {
+            if (currentQuestionIndex >= currentLevelQuestions.length) {
+                currentLevel++;
+                startLevel();
+                return;
+            }
+
+            resetState();
+            const questionData = currentLevelQuestions[currentQuestionIndex];
+            
+            // Data validation for the current question
+            if (!questionData || !questionData.question || !questionData.options || questionData.options.length !== 4 || !questionData.answer || !questionData.hint) {
+                console.error("Invalid question data:", questionData);
+                // Skip to the next question if the current one is invalid
+                currentQuestionIndex++;
+                loadQuestion();
+                return;
+            }
+
+            questionTextEl.textContent = questionData.question;
+            optionsGrid.innerHTML = '';
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option');
+                button.setAttribute('aria-label', `Select option: ${option}`);
+                button.addEventListener('click', () => selectOption(button, questionData.answer));
+                optionsGrid.appendChild(button);
+            });
+            updateProgress();
+        }
+
+        /**
+         * Handles the user's selection of an answer.
+         * It checks if the answer is correct, updates the score, provides visual feedback, and stops the timer.
+         * @param {HTMLElement} selectedButton - The button element the user clicked.
+         * @param {string} correctAnswer - The correct answer for the current question.
+         */
+        function selectOption(selectedButton, correctAnswer) {
+            clearInterval(timer);
+            const isCorrect = selectedButton.textContent === correctAnswer;
+            if (isCorrect) {
+                selectedButton.classList.add('correct');
+                score += 10;
+            } else {
+                selectedButton.classList.add('incorrect');
+                incorrectAnswers.push({
+                    question: currentLevelQuestions[currentQuestionIndex].question,
+                    yourAnswer: selectedButton.textContent,
+                    correctAnswer: correctAnswer
+                });
+                // Highlight the correct answer
+                Array.from(optionsGrid.children).forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            scoreEl.textContent = `Score: ${score}`;
+            disableOptions();
+            nextBtn.style.display = 'block';
+        }
+
+        /**
+         * Displays the final results of the quiz.
+         * Shows the final score, high score (from localStorage), and a list of incorrect answers.
+         */
+        function showResults() {
+            quizScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+            finalScoreEl.textContent = score;
+
+            let highScore = 0;
+            try {
+                highScore = localStorage.getItem('quizHighScore') || 0;
+            } catch (e) {
+                console.error("Failed to access localStorage for high score.", e);
+            }
+
+            if (score > highScore) {
+                highScore = score;
+                try {
+                    localStorage.setItem('quizHighScore', highScore);
+                } catch (e) {
+                    console.error("Failed to save high score to localStorage.", e);
+                }
+            }
+            highScoreEl.textContent = highScore;
+
+            incorrectAnswersList.innerHTML = '';
+            if (incorrectAnswers.length > 0) {
+                incorrectAnswers.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>Q:</strong> ${item.question}<br><strong>Your Answer:</strong> ${item.yourAnswer}<br><strong>Correct:</strong> ${item.correctAnswer}`;
+                    incorrectAnswersList.appendChild(li);
+                });
+            } else {
+                incorrectAnswersList.innerHTML = '<li>You answered every question correctly!</li>';
+            }
+        }
+        
+        /**
+         * Starts the quiz application.
+         * Hides the start screen and shows the quiz screen.
+         */
+        function startQuiz() {
+            startScreen.style.display = 'none';
+            resultScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            currentLevel = 0;
+            score = 0;
+            incorrectAnswers = [];
+            scoreEl.textContent = `Score: ${score}`;
+            startLevel();
+        }
+
+        /**
+         * Restarts the entire quiz.
+         * Resets all state variables and brings the user back to the first level.
+         */
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // --- HELPER & UI FUNCTIONS ---
+
+        function updateProgress() {
+            const progressPercentage = ((currentQuestionIndex + 1) / currentLevelQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            questionCounterEl.textContent = `Question: ${currentQuestionIndex + 1}/${currentLevelQuestions.length}`;
+            timeLeft = 15;
+            timerEl.textContent = timeLeft;
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                markAsIncorrect();
+                hintTextEl.textContent = "Time's up!";
+                hintModal.style.display = 'flex';
+                setTimeout(() => {
+                    hintModal.style.display = 'none';
+                }, 1000);
+            }
+        }
+
+        function markAsIncorrect() {
+            const correctAnswer = currentLevelQuestions[currentQuestionIndex].answer;
+            incorrectAnswers.push({
+                question: currentLevelQuestions[currentQuestionIndex].question,
+                yourAnswer: "None (Time's Up)",
+                correctAnswer: correctAnswer
+            });
+            Array.from(optionsGrid.children).forEach(btn => {
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+            });
+            disableOptions();
+            nextBtn.style.display = 'block';
+        }
+
+        function disableOptions() {
+            Array.from(optionsGrid.children).forEach(btn => btn.classList.add('disabled'));
+        }
+
+
+        function resetState() {
+            nextBtn.style.display = 'none';
+            hintBtn.disabled = false;
+            Array.from(optionsGrid.children).forEach(btn => {
+                btn.classList.remove('correct', 'incorrect', 'disabled');
+            });
+        }
+        
+        function updateLevelIndicator() {
+            levelIndicators.forEach(indicator => {
+                const level = parseInt(indicator.dataset.level, 10);
+                if (level === currentLevel + 1) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+            levelInfo.textContent = `Level: ${currentLevel + 1}`;
+        }
+        
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        });
+
+        hintBtn.addEventListener('click', () => {
+            if (score >= 5) {
+                score -= 5;
+                scoreEl.textContent = `Score: ${score}`;
+            }
+            hintTextEl.textContent = currentLevelQuestions[currentQuestionIndex].hint;
+            hintModal.style.display = 'flex';
+            hintBtn.disabled = true;
+        });
+
+        hintModal.addEventListener('click', (e) => {
+            if (e.target === hintModal) {
+                hintModal.style.display = 'none';
+            }
+        });
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const focusedElement = document.activeElement;
+                if (focusedElement.classList.contains('option')) {
+                    focusedElement.click();
+                }
+            }
+        });
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            let savedTheme;
+            try {
+                savedTheme = localStorage.getItem('quizTheme') || 'light';
+            } catch(e) {
+                console.error("Could not access localStorage. Defaulting to light theme.", e);
+                savedTheme = 'light';
+            }
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.textContent = savedTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+        });
+
+    </script>
+</body>
+</html>
